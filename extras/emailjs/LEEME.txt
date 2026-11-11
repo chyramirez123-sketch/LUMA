@@ -1,0 +1,25 @@
+LUMA · Plantitas Verdes — configurar EmailJS (sin programar)
+=============================================================
+1) Crea una cuenta gratis en https://www.emailjs.com (plan gratuito: 200 correos al mes).
+2) Email Services -> Add New Service -> Gmail -> "Connect Account" con el Gmail de la tienda.
+   Copia el "Service ID" (por ejemplo service_abc123).
+3) Email Templates -> Create New Template y llena así:
+     Subject ............ {{subject}}
+     Content ............ pulsa "Edit Content" -> "Code Editor", borra todo y pega:  {{{message_html}}}
+                          (tres llaves: así EmailJS respeta el diseño HTML del ticket)
+     To Email ........... {{to_email}}
+     From Name .......... {{from_name}}
+     Reply To ........... {{reply_to}}
+   Guarda y copia el "Template ID" (por ejemplo template_xyz789).
+4) Account -> General: copia tu "Public Key".
+5) En js/data.js:
+     CORREO: {
+       PROVEEDOR: 'emailjs',
+       EMAILJS: { SERVICE_ID: 'service_abc123', TEMPLATE_ID: 'template_xyz789', PUBLIC_KEY: 'tu_public_key' },
+       ...
+     }
+6) Sube VERSION en sw.js (por ejemplo 'v5') y recarga la app.
+7) Entra como administrador -> Resumen -> "Envío de tickets por correo" -> escribe tu correo -> "Enviar prueba".
+
+Variables que manda la app: to_email, to_name, from_name, reply_to, subject, message_html, message_text.
+Opcional: en Account -> Security puedes limitar el uso a tu dominio (por ejemplo tu-usuario.github.io).

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "fuente": "LUMA - adaptador de demostración (archivo estático local, NO es un servidor remoto)",
+  "actualizado": "2026-10-01T00:00:00.000Z",
+  "productos": [
+    { "id": "monstera-deliciosa",  "precio": 420, "stock": 12 },
+    { "id": "sansevieria",         "precio": 290, "stock": 15 },
+    { "id": "pothos",              "precio": 240, "stock": 18 },
+    { "id": "zamioculca",          "precio": 360, "stock": 9 },
+    { "id": "ficus-lyrata",        "precio": 650, "stock": 6 },
+    { "id": "dracaena-marginata",  "precio": 520, "stock": 7 },
+    { "id": "philodendron",        "precio": 280, "stock": 14 },
+    { "id": "calathea",            "precio": 330, "stock": 8 },
+    { "id": "ficus-elastica",      "precio": 480, "stock": 10 },
+    { "id": "alocasia",            "precio": 390, "stock": 5 }
+  ]
+}
