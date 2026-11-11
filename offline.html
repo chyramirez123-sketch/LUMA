@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUMA — Sin conexión</title>
+<meta name="theme-color" content="#344634">
+<link rel="icon" type="image/png" href="img/icon-48.png">
+<style>
+  @font-face{font-family:Poppins;src:url(fonts/Poppins-Regular.woff) format("woff");font-weight:400;font-display:swap}
+  @font-face{font-family:Lora;src:url(fonts/Lora-Variable.woff) format("woff");font-weight:400 700;font-display:swap}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#F5F4ED;color:#2B2B2B;font-family:Poppins,system-ui,sans-serif;text-align:center}
+  main{max-width:360px}
+  img{width:120px;height:auto;margin-bottom:12px}
+  h1{font-family:Lora,Georgia,serif;color:#344634;font-size:1.7rem;margin:.2em 0}
+  p{color:#5a655a;line-height:1.55}
+  a,button{display:inline-block;margin:6px 4px;padding:12px 22px;border-radius:999px;border:0;background:#344634;color:#fff;font:inherit;font-weight:500;text-decoration:none;cursor:pointer}
+  a.alt{background:#fff;color:#344634;border:1.5px solid #344634}
+</style>
+</head>
+<body>
+<main>
+  <img src="img/luma-logo.png" alt="LUMA — Plants | Pots | Living" width="120" height="142">
+  <h1>Sin conexión</h1>
+  <p>Esta pantalla todavía no está guardada en tu dispositivo. Vuelve a conectarte para abrirla; las pantallas que ya visitaste siguen disponibles sin internet.</p>
+  <button onclick="location.reload()">Reintentar</button>
+  <a class="alt" href="index.html">Ir al inicio</a>
+</main>
+</body>
+</html>

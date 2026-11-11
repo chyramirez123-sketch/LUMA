@@ -1,0 +1,61 @@
+{
+  "id": "./index.html",
+  "name": "LUMA — Plants | Pots | Living",
+  "short_name": "LUMA",
+  "description": "Plantitas Verdes LUMA: pide plantas y recíbelas a domicilio. Funciona sin conexión.",
+  "lang": "es-MX",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F4ED",
+  "theme_color": "#344634",
+  "categories": [
+    "shopping",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Plantas",
+      "url": "./productos.html",
+      "icons": [
+        {
+          "src": "img/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mi carrito",
+      "url": "./carrito.html",
+      "icons": [
+        {
+          "src": "img/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
