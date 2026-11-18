@@ -133,17 +133,42 @@
         (i[0] === 'carrito' ? '<span class="badge" data-cart-count' + (n ? '' : ' hidden') + '>' + n + '</span>' : '') + '</span><span>' + i[3] + '</span></a>';
     }).join('') + '</nav>';
   }
+  /* ---------- Versión web (pantallas grandes): encabezado y pie de página ----------
+     Se insertan en todas las pantallas del cliente; el CSS los muestra solo en
+     computadora o tableta horizontal (≥ 1000 px) y en el celular se usa la barra inferior. */
+  var WEB_NAV = [['inicio', 'index.html', 'Inicio'], ['plantas', 'productos.html', 'Plantas'], ['favoritos', 'favoritos.html', 'Favoritos'], ['pedidos', 'pedidos.html', 'Mis pedidos']];
+  function siteHeader(active) {
+    var n = S.Cart.count(), me = S.Auth.me ? S.Auth.me() : null;
+    var av = me && window.LumaAvatar ? window.LumaAvatar(me, 'xs') : icon('user', '', 22);
+    return '<header class="site-header" role="banner"><div class="sh-in">' +
+      '<a class="sh-logo" href="index.html" aria-label="LUMA, ir al inicio"><img src="img/luma-logo-horizontal.png" alt="LUMA — Plants | Pots | Living" width="150" height="40"></a>' +
+      '<nav class="sh-nav" aria-label="Secciones de la tienda">' + WEB_NAV.map(function (i) {
+        return '<a href="' + i[1] + '"' + (i[0] === active ? ' class="on" aria-current="page"' : '') + '>' + i[2] + '</a>';
+      }).join('') + '</nav>' +
+      '<form class="sh-search" action="productos.html" method="get" role="search"><label class="sr-only" for="shq">Buscar plantas</label>' + icon('search', '', 18) +
+      '<input id="shq" name="q" type="search" placeholder="Buscar plantas…" autocomplete="off" value="' + esc(document.body.dataset.page === 'productos' ? (q('q') || '') : '') + '"></form>' +
+      '<div class="sh-acts"><a class="sh-ic' + (active === 'carrito' ? ' on' : '') + '" href="carrito.html" aria-label="Carrito">' + icon('cart', '', 22) + '<span class="badge" data-cart-count' + (n ? '' : ' hidden') + '>' + n + '</span></a>' +
+      '<a class="sh-me' + (active === 'perfil' ? ' on' : '') + '" href="perfil.html" aria-label="Mi perfil">' + av + '<span>' + esc(me ? me.nombre : 'Mi cuenta') + '</span></a></div>' +
+      '</div></header>';
+  }
+  function siteFooter() {
+    return '<footer class="site-footer"><div class="sf-in">' +
+      '<div class="sf-brand"><img src="img/luma-isotipo.png" alt="" width="40" height="40"><div><b>Plantitas Verdes LUMA</b><span>Plants | Pots | Living</span></div></div>' +
+      '<nav class="sf-nav" aria-label="Enlaces del pie de página"><a href="productos.html">Catálogo</a><a href="favoritos.html">Favoritos</a><a href="carrito.html">Carrito</a><a href="pedidos.html">Mis pedidos</a><a href="perfil.html">Mi cuenta</a></nav>' +
+      '<p class="sf-note">Entrega a domicilio y pago al recibir. LUMA no procesa pagos en línea.</p>' +
+      '</div></footer>';
+  }
   function updateCartBadges() {
     var n = S.Cart.count();
     document.querySelectorAll('[data-cart-count]').forEach(function (b) { b.textContent = n; b.hidden = !n; });
   }
-  var ADMIN_TABS = [['resumen', 'resumen.html', 'Resumen'], ['pedidos', 'pedidos.html', 'Pedidos'], ['inventario', 'inventario.html', 'Inventario'], ['clientes', 'clientes.html', 'Clientes'], ['opiniones', 'opiniones.html', 'Opiniones']];
+  var ADMIN_TABS = [['resumen', 'resumen.html', 'Resumen', 'chart'], ['pedidos', 'pedidos.html', 'Pedidos', 'clipboard'], ['inventario', 'inventario.html', 'Inventario', 'leaf'], ['clientes', 'clientes.html', 'Clientes', 'users'], ['opiniones', 'opiniones.html', 'Opiniones', 'comment']];
   function adminHeader(active, title) {
     var s = S.Auth.session() || {};
-    return '<header class="admin-head"><div class="admin-top"><img class="admin-logo" src="img/luma-isotipo.png" alt="" width="34" height="34"><div><h1>' + esc(title || 'Panel LUMA') + '</h1><p>' + esc(s.email || '') + '</p></div>' +
+    return '<header class="admin-head"><div class="admin-top"><img class="admin-logo" src="img/luma-isotipo.png" alt="" width="34" height="34"><div><h1>' + esc(title || 'Panel LUMA') + '</h1><p>' + esc(s.email || '') + '</p></div><p class="side-brand">Panel de administración<br><b>Plantitas Verdes LUMA</b></p>' +
       '<button class="icon-btn light" data-admin-logout aria-label="Cerrar sesión">' + icon('logout') + '</button></div>' +
       '<div class="admin-tabs" role="tablist">' + ADMIN_TABS.map(function (t) {
-        return '<a role="tab" class="' + (t[0] === active ? 'active' : '') + '" href="' + t[1] + '"' + (t[0] === active ? ' aria-selected="true"' : '') + '>' + t[2] + '</a>';
+        return '<a role="tab" class="' + (t[0] === active ? 'active' : '') + '" href="' + t[1] + '"' + (t[0] === active ? ' aria-selected="true"' : '') + '>' + icon(t[3], 'at-ic', 20) + '<span>' + t[2] + '</span></a>';
       }).join('') + '</div></header>';
   }
 
@@ -167,5 +192,5 @@
 
   window.LumaUI = { icon: icon, starIcon: starIcon, esc: esc, money: money, moneyS: moneyS, fmtDate: fmtDate, q: q, ratingHTML: ratingHTML, starsRow: starsRow,
     img: img, PLACEHOLDER: PLACEHOLDER, toast: toast, openSheet: openSheet, closeSheet: closeSheet, confirmBox: confirmBox,
-    bottomNav: bottomNav, updateCartBadges: updateCartBadges, adminHeader: adminHeader, productCard: productCard, netBar: netBar };
+    bottomNav: bottomNav, siteHeader: siteHeader, siteFooter: siteFooter, updateCartBadges: updateCartBadges, adminHeader: adminHeader, productCard: productCard, netBar: netBar };
 })();

@@ -1,6 +1,16 @@
 LUMA — PLANTS | POTS | LIVING
 Plantitas Verdes LUMA · aplicación móvil PWA de catálogo y pedidos de plantas a domicilio
 =====================================================
+VERSIÓN WEB RESPONSIVA (v8): la misma aplicación funciona como página web en computadora,
+laptop, tableta y celular. Se adapta sola al tamaño de la pantalla:
+  · Celular (menos de 700 px): diseño móvil original con barra de navegación inferior.
+  · Tableta (700 a 999 px): ancho completo, catálogo en 3 columnas, ventanas centradas.
+  · Computadora (1000 px o más): encabezado web con menú (Inicio, Plantas, Favoritos, Mis pedidos),
+    buscador, carrito y perfil; pie de página; detalle de planta en dos columnas; carrito, entrega,
+    confirmación y ticket con resumen lateral; inicio de sesión en pantalla dividida; panel de
+    administración con barra lateral y tablero en columnas.
+Todo está en style.css (bloque "VERSIÓN WEB RESPONSIVA"), js/ui.js (encabezado y pie) y app.js (mount).
+
 HTML5 + CSS3 + JavaScript vanilla · Web App Manifest · Service Worker · Cache Storage ·
 Fetch API · LocalStorage · IndexedDB. No requiere Node, npm ni compilación.
 
@@ -37,7 +47,7 @@ LUMA_PWA_APP/
   admin.html            Acceso administrador        resumen.html    Dashboard (Resumen)
   productos.html        Catálogo, búsqueda y filtros (Todas / Interior / Tropicales / Decorativas)
   producto.html         Detalle: galería, cuidados, opiniones, recomendadas
-  visor.html            Visor "3D" simulado con fotografías (ver sección 6)
+  visor.html            Visor 3D con el modelo .glb de cada planta (ver sección 6)
   carrito.html          Pedido en 4 pasos: Carrito -> Entrega (#entrega) -> Confirmar (#confirmar) -> Ticket
   favoritos.html        Favoritos
   perfil.html           Perfil: foto, nombre, correo, contraseña, dirección de entrega, configuración, ayuda
@@ -101,18 +111,22 @@ para ver la app; la instalación necesita HTTPS (o un túnel HTTPS como el de Cl
   iPhone: Safari -> Compartir -> "Agregar a pantalla de inicio".
 
 
-6. VISOR "3D" (simulación)
+6. VISOR 3D (modelos .glb)
 --------------------------
-No se proporcionaron modelos GLB/GLTF, por eso el visor NO es un modelo 3D real: combina las
-fotografías (principal, superior, lateral, hoja, base) con rotación, inclinación, zoom,
-movimiento e iluminación hechos con CSS/JavaScript. La pantalla lo indica con un aviso visible.
-Modo AR: no disponible en la demostración (también se indica en pantalla). Vista real: foto sin efectos.
-Si más adelante tienes modelos .glb, se puede integrar un visor 3D real (por ejemplo <model-viewer>).
+Cada una de las 10 plantas tiene su modelo 3D sencillo en img/plantas/<planta>/<planta>_LUMA_3D.glb
+(maceta + tallos + hojas con color por vértice). visor.html lo muestra con <model-viewer> de Google:
+arrastrar para girar, rueda del ratón o dos dedos para acercar, "Detener rotación" y "Restablecer vista".
+  · En la v8 se corrigió la orientación de los 10 modelos: venían con el eje Z hacia arriba y el
+    estándar glTF usa el eje Y, por lo que se veían acostados. Ahora aparecen de pie. Forma y colores
+    no cambiaron.
+  · La librería <model-viewer> se carga de internet (ajax.googleapis.com); sin conexión el modelo no
+    se dibuja aunque los .glb estén en la caché. Abre la app desde un servidor (localhost o HTTPS).
+  · El visor de fotografías anterior se conserva como respaldo para plantas sin modelo.
 
 
 7. ESTRATEGIAS DE CACHÉ (sw.js) Y CÓMO COMPROBARLAS
 ---------------------------------------------------
-Cachés versionadas: luma-static-v5 · luma-images-v5 · luma-api-v5 (VERSION en sw.js).
+Cachés versionadas: luma-static-v8-web · luma-images-v8-web · luma-api-v8-web (VERSION en sw.js).
 Al activarse, el Service Worker borra las cachés luma-* de versiones anteriores.
   A) CACHE FIRST            CSS, JS, fuentes, logo e iconos (luma-static-v1).
   B) NETWORK FIRST          Peticiones a api/… (luma-api-v1): red con tiempo máximo de 3.5 s; si falla,
@@ -222,6 +236,8 @@ Los datos de versiones anteriores se conservan: al actualizar, "Listo para recog
 - "El script respondió algo inesperado": vuelve a implementar como Aplicación web con acceso "Cualquier usuario".
 
 --- Historial de versiones ---
+v8 (web): versión web responsiva para cualquier pantalla (celular, tableta, laptop, monitor ancho) sin
+    cambiar el diseño móvil; visor 3D con los 10 modelos .glb (orientación corregida). Service Worker v8-web.
 v5: el administrador puede editar y eliminar clientes; el ticket se envía solo al correo registrado del cliente
     (sin botones manuales para el cliente); activación del correo desde el panel. Service Worker v5.
 v4: pedido a domicilio con formulario de entrega, ticket completo con seguimiento, envío del ticket por correo

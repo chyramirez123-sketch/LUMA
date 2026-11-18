@@ -11,7 +11,7 @@
    ========================================================= */
 'use strict';
 
-const VERSION = 'v7-3d-all';                       // súbela (v2, v3…) cuando cambies archivos estáticos
+const VERSION = 'v8-web';                  // súbela (v2, v3…) cuando cambies archivos estáticos
 const CACHE_STATIC = 'luma-static-' + VERSION;
 const CACHE_IMAGES = 'luma-images-' + VERSION;
 const CACHE_API = 'luma-api-' + VERSION;

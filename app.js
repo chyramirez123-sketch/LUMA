@@ -14,8 +14,22 @@
   S.init();
 
   /* ---------- Utilidades de pantalla ---------- */
+  /* Versión web: qué sección se marca en el encabezado de escritorio según la página */
+  var WEB_ACTIVE = { index: 'inicio', productos: 'plantas', producto: 'plantas', visor: 'plantas', favoritos: 'favoritos', carrito: 'carrito', ticket: 'pedidos', pedidos: 'pedidos', perfil: 'perfil' };
+  var AUTH_PAGES = { login: 1, registro: 1, adminlogin: 1 };
+  function authArt() {
+    return '<aside class="auth-art" aria-hidden="true"><img class="aa-pic" src="img/plantas/monstera/monstera-principal.webp" alt="" width="767" height="831">' +
+      '<div class="aa-txt"><img src="img/luma-logo-horizontal.png" alt="" width="170" height="45" class="aa-logo"><h2 class="serif">Plantas reales para cada rincón de tu hogar.</h2>' +
+      '<p>Elige entre las 10 especies de nuestro catálogo y te las llevamos a domicilio. Pagas al recibirlas.</p></div></aside>';
+  }
   function mount(html, navActive) {
-    APP.innerHTML = '<div id="netbar" class="netbar" hidden></div>' + html + (navActive ? U.bottomNav(navActive) : '');
+    var bar = '<div id="netbar" class="netbar" hidden></div>';
+    var cliente = WEB_ACTIVE[page] && sess && !S.Auth.isAdmin();
+    document.body.classList.toggle('web-client', !!cliente);
+    document.body.classList.toggle('web-auth', !!AUTH_PAGES[page]);
+    if (AUTH_PAGES[page]) APP.innerHTML = bar + '<div class="auth-split">' + authArt() + '<div class="auth-col">' + html + '</div></div>';
+    else if (cliente) APP.innerHTML = bar + U.siteHeader(WEB_ACTIVE[page]) + html + U.siteFooter() + (navActive ? U.bottomNav(navActive) : '');
+    else APP.innerHTML = bar + html + (navActive ? U.bottomNav(navActive) : '');
     U.netBar();
   }
   function topbar(title, o) {
@@ -408,17 +422,17 @@
   function carritoLista() {
     var items = S.Cart.items(), t = S.Cart.totals(), allSel = items.length && items.every(function (i) { return i.sel; });
     mount('<main class="view with-nav">' + topbar('Mi carrito', { back: false }) + (items.length ? steps(1) +
-      '<label class="selall"><input type="checkbox" id="selall" ' + (allSel ? 'checked' : '') + '><span class="cbx"></span> Seleccionar todo</label><div class="rows">' + items.map(function (i) {
+      '<div class="co-grid"><div class="co-main"><label class="selall"><input type="checkbox" id="selall" ' + (allSel ? 'checked' : '') + '><span class="cbx"></span> Seleccionar todo</label><div class="rows">' + items.map(function (i) {
         var p = S.Products.get(i.id), over = i.qty > p.stock;
         return '<article class="card row cartrow' + (i.sel ? '' : ' off') + '" data-id="' + esc(p.id) + '"><label class="cb"><input type="checkbox" data-sel="' + esc(p.id) + '" ' + (i.sel ? 'checked' : '') + ' aria-label="Incluir ' + esc(p.nombre) + '"><span class="cbx"></span></label>' +
           '<a class="row-img sm" href="producto.html?id=' + encodeURIComponent(p.id) + '">' + U.img(window.lumaMiniatura(p), p.nombre) + '</a>' +
           '<div class="row-info"><a class="pname" href="producto.html?id=' + encodeURIComponent(p.id) + '">' + esc(p.nombre) + '</a><div class="pcommon">' + esc(p.categoria) + ' · ' + moneyS(p.precio) + ' c/u</div>' + (over ? '<div class="err">Solo hay ' + p.stock + ' disponibles</div>' : '') +
           '<div class="prow"><span class="price">' + money(p.precio * i.qty) + '</span><span class="qty sm"><button data-dec="' + esc(p.id) + '" aria-label="Disminuir">' + icon('minus', '', 16) + '</button><output>' + i.qty + '</output><button data-inc="' + esc(p.id) + '" aria-label="Aumentar">' + icon('plus', '', 16) + '</button></span></div></div>' +
           '<button class="icon-btn del" data-del="' + esc(p.id) + '" aria-label="Eliminar ' + esc(p.nombre) + '">' + icon('trash', '', 20) + '</button></article>';
-      }).join('') + '</div>' +
+      }).join('') + '</div></div><aside class="co-side">' +
       '<section class="card summary"><div class="line"><span>Subtotal <small class="muted">(' + t.unidades + ' ' + (t.unidades === 1 ? 'planta' : 'plantas') + ')</small></span><b>' + money(t.subtotal) + '</b></div><div class="line"><span>Envío a domicilio</span><b>' + (t.envio ? money(t.envio) : 'Gratis') + '</b></div><div class="line total"><span>Total</span><b>' + money(t.total) + ' <small>MXN</small></b></div></section>' +
       '<div class="note">' + icon('bag', '', 20) + '<div><b>Pagas al recibir tus plantas.</b><br><span class="small">En el siguiente paso nos dices a dónde llevarlas. LUMA no procesa pagos en línea.</span></div></div>' +
-      '<button class="btn primary block" id="next" ' + (t.unidades ? '' : 'disabled') + '>Continuar con la entrega ' + icon('arrow', '', 18) + '</button>' :
+      '<button class="btn primary block" id="next" ' + (t.unidades ? '' : 'disabled') + '>Continuar con la entrega ' + icon('arrow', '', 18) + '</button></aside></div>' :
       '<div class="empty">' + icon('cart', '', 48) + '<h3 class="serif">Tu carrito está vacío</h3><p>Agrega plantas para hacer tu pedido.</p><a class="btn primary sm" href="productos.html">Explorar plantas</a></div>') + '</main>', 'carrito');
     if (!items.length) return;
     $('#selall').onchange = function (e) { S.Cart.toggleAll(e.target.checked); carritoLista(); };
@@ -442,10 +456,10 @@
     if (!S.Cart.totals().unidades) { location.replace('carrito.html'); return; }
     var d = draftLoad();
     mount('<main class="view with-nav">' + topbar('Datos de entrega', { backHref: 'carrito.html' }) + steps(2) +
-      (d._guardada ? '<div class="note ok">' + icon('check', '', 18) + '<div>Llenamos el formulario con tu dirección guardada. Revisa que esté correcta.</div></div>' : '<p class="muted small intro-f">Necesitamos estos datos para llevarte tus plantas. Los campos marcados como opcionales puedes dejarlos vacíos.</p>') +
+      '<div class="co-grid"><div class="co-main">' + (d._guardada ? '<div class="note ok">' + icon('check', '', 18) + '<div>Llenamos el formulario con tu dirección guardada. Revisa que esté correcta.</div></div>' : '<p class="muted small intro-f">Necesitamos estos datos para llevarte tus plantas. Los campos marcados como opcionales puedes dejarlos vacíos.</p>') +
       '<form id="fe" class="card form-card" novalidate>' + entregaFields(d) +
-      '<label class="chk"><input type="checkbox" id="e-guardar"' + (d._guardar !== false ? ' checked' : '') + '><span class="cbx"></span> Guardar estos datos para mis próximos pedidos</label></form>' +
-      miniResumen() + '<button class="btn primary block" id="go">Revisar mi pedido ' + icon('arrow', '', 18) + '</button></main>', 'carrito');
+      '<label class="chk"><input type="checkbox" id="e-guardar"' + (d._guardar !== false ? ' checked' : '') + '><span class="cbx"></span> Guardar estos datos para mis próximos pedidos</label></form></div>' +
+      '<aside class="co-side">' + miniResumen() + '<button class="btn primary block" id="go">Revisar mi pedido ' + icon('arrow', '', 18) + '</button></aside></div></main>', 'carrito');
     var f = $('#fe'); soloNumeros(f);
     f.addEventListener('submit', function (e) { e.preventDefault(); $('#go').click(); });
     $('#go').onclick = function () {
@@ -463,7 +477,7 @@
     if (Object.keys(v.errs).length) { location.replace('carrito.html#entrega'); return; }
     var e = v.datos, sel = S.Cart.items().filter(function (i) { return i.sel; }), mailOn = window.LumaMail.configurado() && CFG.CORREO.ENVIAR_AL_CONFIRMAR;
     mount('<main class="view with-nav">' + topbar('Confirma tu pedido', { backHref: 'carrito.html#entrega' }) + steps(3) +
-      '<section class="card blk"><div class="blk-h"><h3>Tu pedido</h3><a href="carrito.html" class="lnk">Editar</a></div>' + sel.map(function (i) {
+      '<div class="co-grid"><div class="co-main"><section class="card blk"><div class="blk-h"><h3>Tu pedido</h3><a href="carrito.html" class="lnk">Editar</a></div>' + sel.map(function (i) {
         var p = S.Products.get(i.id);
         return '<div class="ln-item">' + U.img(window.lumaMiniatura(p), p.nombre) + '<div><b>' + esc(p.nombre) + '</b><span class="muted small">' + i.qty + ' × ' + money(p.precio) + '</span></div><b>' + money(p.precio * i.qty) + '</b></div>';
       }).join('') +
@@ -471,9 +485,9 @@
       '<section class="card blk"><div class="blk-h"><h3>Entrega a domicilio</h3><a href="carrito.html#entrega" class="lnk">Editar</a></div>' +
       '<dl class="dl"><div><dt>Recibe</dt><dd>' + esc(e.nombre) + '</dd></div><div><dt>Teléfono</dt><dd>' + esc(window.LumaMail.telefono(e.telefono)) + '</dd></div><div><dt>Dirección</dt><dd>' + dirHTML(e) + '</dd></div>' +
       (e.referencias ? '<div><dt>Referencias</dt><dd>' + esc(e.referencias) + '</dd></div>' : '') + '<div><dt>Horario</dt><dd>' + esc(e.horario) + '</dd></div></dl></section>' +
-      '<section class="card blk"><div class="blk-h"><h3>Tu ticket</h3></div><p class="small">' + icon('mail', '', 16) + (mailOn ? ' Al confirmar, te llegará automáticamente el ticket de <b>Plantitas Verdes LUMA</b> a tu correo registrado: <b>' + esc(sess.email) + '</b>.' : ' Tu ticket quedará guardado en “Mis pedidos”. <span class="muted">(El envío automático por correo aún no está activado en la tienda.)</span>') + '</p></section>' +
-      '<div class="note">' + icon('bag', '', 20) + '<div><b>Pago al recibir.</b> Pagas cuando te entreguemos tus plantas. LUMA no procesa pagos en línea.</div></div>' +
-      '<button class="btn primary block" id="ok">' + icon('check', '', 18) + ' Confirmar pedido</button></main>', 'carrito');
+      '<section class="card blk"><div class="blk-h"><h3>Tu ticket</h3></div><p class="small">' + icon('mail', '', 16) + (mailOn ? ' Al confirmar, te llegará automáticamente el ticket de <b>Plantitas Verdes LUMA</b> a tu correo registrado: <b>' + esc(sess.email) + '</b>.' : ' Tu ticket quedará guardado en “Mis pedidos”. <span class="muted">(El envío automático por correo aún no está activado en la tienda.)</span>') + '</p></section></div>' +
+      '<aside class="co-side"><div class="note">' + icon('bag', '', 20) + '<div><b>Pago al recibir.</b> Pagas cuando te entreguemos tus plantas. LUMA no procesa pagos en línea.</div></div>' +
+      '<button class="btn primary block" id="ok">' + icon('check', '', 18) + ' Confirmar pedido</button></aside></div></main>', 'carrito');
     $('#ok').onclick = function () {
       this.disabled = true;
       var r = S.Orders.create(e, d._guardar !== false);
@@ -533,7 +547,7 @@
     var sig = S.Orders.SIGUIENTE[o.estado];
     mount('<main class="view' + (adm ? '' : ' with-nav') + '">' + topbar('Ticket de pedido', { backHref: adm ? 'pedidos.html' : (nuevo ? 'index.html' : 'pedidos.html') }) + (nuevo ? steps(4) : '') +
       (nuevo ? '<div class="note ok big">' + icon('check', '', 22) + '<div><b>¡Pedido confirmado!</b><br><span class="small">Guarda tu folio. Te avisaremos cuando vaya en camino.</span></div></div>' : '') +
-      '<section class="ticket card" id="ticket"><div class="t-head"><img src="img/luma-logo-horizontal.png" alt="LUMA" height="34"><p class="t-brand">Plantitas Verdes LUMA</p><p class="muted small">PLANTS | POTS | LIVING</p></div>' +
+      '<div class="co-grid tk-grid"><div class="co-main"><section class="ticket card" id="ticket"><div class="t-head"><img src="img/luma-logo-horizontal.png" alt="LUMA" height="34"><p class="t-brand">Plantitas Verdes LUMA</p><p class="muted small">PLANTS | POTS | LIVING</p></div>' +
       '<div class="t-status st-' + esc(o.estado.replace(' ', '-').toLowerCase()) + '"><span class="ts-ic">' + icon(info[0], '', 22) + '</span><div><b>' + esc(info[1]) + '</b><span>' + esc(sub) + '</span></div></div>' +
       '<div class="t-folio"><span class="muted small">Folio</span><b>' + esc(o.folio) + '</b>' + (o.demo ? '<span class="tag demo">Ejemplo</span>' : '') + '</div>' +
       '<dl class="t-meta"><div><dt>Fecha del pedido</dt><dd>' + U.fmtDate(o.fecha) + '</dd></div><div><dt>Estado</dt><dd>' + statusBadge(o.estado) + '</dd></div></dl>' +
@@ -549,14 +563,14 @@
         : '<div class="note">' + icon('help', '', 18) + '<div>Este pedido se hizo antes de la entrega a domicilio y no tiene dirección registrada.</div></div>') +
       '<h4 class="t-sec">Productos</h4><table class="t-table"><thead><tr><th>Cant.</th><th>Planta</th><th class="r">Precio</th><th class="r">Importe</th></tr></thead><tbody>' + o.items.map(function (i) { return '<tr><td>' + i.qty + '</td><td>' + esc(i.nombre) + '</td><td class="r">' + money(i.precio) + '</td><td class="r">' + money(i.precio * i.qty) + '</td></tr>'; }).join('') + '</tbody>' +
       '<tfoot><tr class="sub"><td colspan="3">Subtotal</td><td class="r">' + money(o.subtotal != null ? o.subtotal : o.total) + '</td></tr><tr class="sub"><td colspan="3">Envío</td><td class="r">' + (o.envio ? money(o.envio) : 'Gratis') + '</td></tr><tr><td colspan="3">Total</td><td class="r"><b>' + money(o.total) + ' MXN</b></td></tr></tfoot></table>' +
-      '<div class="t-note">' + icon('bag', '', 20) + '<p><b>Pago al recibir.</b> Pagas cuando te entregamos tus plantas. Este ticket es tu comprobante de pedido, no un comprobante de pago: LUMA no procesa pagos en línea.</p></div></section>' +
+      '<div class="t-note">' + icon('bag', '', 20) + '<p><b>Pago al recibir.</b> Pagas cuando te entregamos tus plantas. Este ticket es tu comprobante de pedido, no un comprobante de pago: LUMA no procesa pagos en línea.</p></div></section></div><aside class="co-side">' +
       (adm && o.estado !== 'Cancelado' && o.estado !== 'Entregado' ? '<section class="card adm-actions"><h4>Atender pedido</h4>' + (sig ? '<button class="btn primary block" id="adv">' + icon(sig === 'Entregado' ? 'check' : sig === 'En camino' ? 'truck' : 'clipboard', '', 18) + ' Marcar como “' + esc(sig) + '”</button>' : '') +
         '<div class="two">' + (e ? '<a class="btn outline" href="tel:' + esc(e.telefono) + '">' + icon('phone', '', 18) + ' Llamar</a><a class="btn outline" target="_blank" rel="noopener" href="' + esc(window.LumaMail.mapa(e)) + '">' + icon('route', '', 18) + ' Cómo llegar</a>' : '') + '</div></section>' : '') +
       '<section class="card mailbox" id="mailst">' + correoBox(o, adm) + '</section>' +
       '<div class="t-actions"><button class="btn primary" id="print">' + icon('print', '', 18) + ' Imprimir</button><button class="btn outline" id="save">' + icon('download', '', 18) + ' Guardar ticket</button></div>' +
       (adm ? '<div class="t-actions"><a class="btn outline" href="' + mailto + '">' + icon('mail', '', 18) + ' Abrir correo</a><a class="btn outline" target="_blank" rel="noopener" href="' + gmail + '">' + icon('mail', '', 18) + ' Abrir Gmail</a></div>' : '') +
       (canCancel ? '<button class="btn danger-outline block" id="cancel">Cancelar pedido</button>' : '') +
-      '<a class="btn ghost block" href="pedidos.html">' + (adm ? 'Volver a pedidos' : 'Ver mis pedidos') + '</a></main>', adm ? null : 'perfil');
+      '<a class="btn ghost block" href="pedidos.html">' + (adm ? 'Volver a pedidos' : 'Ver mis pedidos') + '</a></aside></div></main>', adm ? null : 'perfil');
     $('#print').onclick = function () { window.print(); };
     $('#save').onclick = function () {
       var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([window.LumaMail.html(o, 'reenvio')], { type: 'text/html' })); a.download = 'ticket-' + o.folio + '.html'; document.body.appendChild(a); a.click(); a.remove();
@@ -773,8 +787,8 @@
   };
 
   /* =========================================================
-     VISOR 3D SIMULADO (fotografías + transformaciones CSS/JS)
-     No es un modelo 3D real: combina las vistas fotográficas disponibles.
+     VISOR 3D: modelo .glb de cada planta con <model-viewer> (girar, acercar).
+     Si una planta no tuviera modelo, se usa el visor de fotografías de respaldo.
      ========================================================= */
   Pages.visor = function () {
     var p = S.Products.get(U.q('id')) || S.Products.all()[0];
